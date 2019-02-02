@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const authConfig = require('../../config/auth')
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -30,5 +32,23 @@ UserSchema.pre('save', async function (next) {
   // se caso foi criptografe usando forca de senha 8
   this.password = await bcrypt.hash(this.password, 8)
 })
+
+// declarando metodos que cada instancia de user tenha
+UserSchema.methods = {
+  // comparando senha
+  compareHash (password) {
+    return bcrypt.compare(password, this.password)
+  }
+}
+
+UserSchema.statics = {
+  // pega o id do user
+  generateToken ({ id }) {
+    // retorna o token
+    return jwt.sign({ id }, authConfig.secret, {
+      expiresIn: authConfig.ttl
+    })
+  }
+}
 
 module.exports = mongoose.model('User', UserSchema)
