@@ -2,16 +2,33 @@ const Ad = require('../models/Ad')
 
 class AdController {
   async index (req, res) {
-    // Busca todos ads
-    const ads = await Ad.paginate(
-      {},
-      {
-        page: req.query.page || 1,
-        limit: 20,
-        populate: ['author'],
-        sort: '-createdAt'
+    // filtros
+    const filters = {}
+    // caso exista preco max ou min
+    if (req.query.price_min || req.query.price_max) {
+      filters.price = {}
+      // caso tenha preco minimo mostre preco minimo
+      if (req.query.price_min) {
+        filters.price.$gte = req.query.price_min
       }
-    )
+      // caso tenha preco max mostre preco max
+      if (req.query.price_max) {
+        filters.price.$lte = req.query.price_max
+      }
+    }
+    // filtro nomes
+    if (req.query.title) {
+      // regexp busca em qualquer lugar com case sensitive
+      filters.title = new RegExp(req.query.title, 'i')
+    }
+
+    // Busca todos ads
+    const ads = await Ad.paginate(filters, {
+      page: req.query.page || 1,
+      limit: 20,
+      populate: ['author'],
+      sort: '-createdAt'
+    })
     return res.json(ads)
   }
   async show (req, res) {
