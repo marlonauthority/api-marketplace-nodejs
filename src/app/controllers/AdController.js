@@ -37,6 +37,7 @@ class AdController {
     return res.json(ad)
   }
   async store (req, res) {
+    // throw new Error()
     // cria pegando os paramentros da requisicao req.body e tambem o userid
     // o userid vem la do middlware auth
     const ad = await Ad.create({ ...req.body, author: req.userId })
